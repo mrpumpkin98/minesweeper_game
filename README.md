@@ -22,7 +22,6 @@
 ## 기술 스택
 
 - `TypeScript`와 `React 18.2.0`, `React-native 0.72.5`을 활용했습니다.
-- 게임 보드 관리를 `recoil` 전역 상태 라이브러리를 활용하여 사용 할 수 있도록 설계했어요.
 - `CSS-in-JS` 방식의 `styled-components`를 활용하였습니다.
 
 ## 구현 리스트
