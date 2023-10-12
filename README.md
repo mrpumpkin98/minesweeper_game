@@ -190,3 +190,45 @@ const renderGrid = () => {
 
 ![Peek 2023-10-10 12-35](https://github.com/minsgy/minesweeper_web_game/assets/114569429/9f532408-11c1-4c9c-b8e5-cf97b2758f2e)
 
+## 고민 한 점/아쉬운 점
+
+1. 최적화 적용하기
+
+   - `renderGrid` 함수는 렌더링 과정에서 호출된다.
+   - 이 함수는 `grid`, `gameSuccess`, `flaggedCells`와 같은 상태 값을 사용하여 게임 그리드를 생성하고 그리기 위한 작업을 수행한다.
+   - 게임 상태나 상태가 변경될 때마다 `renderGrid` 함수가 호출되어 새로운 그리드를 생성한다. 이것은 문제가 되는 경우다. 왜냐하면 게임 그리드는 게임 중에는 거의 변하지 않는데, renderGrid 함수가 렌더링마다 계속 실행되면 불필요한 계산이 발생하게 된다. 게임 상태에 영향을 미치지 않는 이러한 계산은 성능에 부담을 줄 수 있으며, 이러한 계산을 피하기 위해 `useMemo`를 사용하여 결과를 캐시하게 된다.
+   - `useMemo`를 사용하면 `renderGrid` 함수의 결과가 변경된 상태에만 다시 계산되므로, 성능을 향상시키고 불필요한 계산을 방지할 수 있다.
+
+```tsx
+  const renderGrid = useMemo(() => {
+    return grid.map((row, rowIndex) => (
+      <View key={rowIndex} style={styles.row}>
+        {row.map((cell, colIndex) => (
+          <TouchableOpacity
+            key={`${rowIndex}-${colIndex}`}
+            style={[
+              styles.cell,
+              cell.isOpen && styles.openCell,
+              cell.isMine && styles.mine,
+            ]}
+            onPress={() => handleCellPress(rowIndex, colIndex)}
+            onLongPress={() => toggleFlag(rowIndex, colIndex)}
+          >
+            {cell.isOpen && !cell.isMine && cell.count > 0 && (
+              <Text style={styles.cellText}>{cell.count}</Text>
+            )}
+            {gameSuccess === "true" ? (
+              cell.isMine && <Text>🎉</Text>
+            ) : gameSuccess === "false" ? (
+              cell.isMine && <Text>💣</Text>
+            ) : flaggedCells.has(`${rowIndex}-${colIndex}`) ? (
+              <Text>🚩</Text>
+            ) : cell.isMine ? (
+              <Text></Text>
+            ) : null}
+          </TouchableOpacity>
+        ))}
+      </View>
+    ));
+  }, [grid, gameSuccess, flaggedCells]);
+```
