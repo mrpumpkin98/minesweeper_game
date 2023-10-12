@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -97,35 +97,38 @@ export default function Beginner() {
     }
   }, [gameSuccess]);
 
-  const calculateSurroundingMineCount = (row: number, col: number): number => {
-    const directions: [number, number][] = [
-      [-1, -1],
-      [-1, 0],
-      [-1, 1],
-      [0, -1],
-      [0, 1],
-      [1, -1],
-      [1, 0],
-      [1, 1],
-    ];
+  const calculateSurroundingMineCount = useMemo(() => {
+    return (row: number, col: number): number => {
+      const directions: [number, number][] = [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [0, -1],
+        [0, 1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+      ];
 
-    let mineCount = 0;
-    for (const [dx, dy] of directions) {
-      const newRow = row + dx;
-      const newCol = col + dy;
-      if (
-        newRow >= 0 &&
-        newRow < numRows &&
-        newCol >= 0 &&
-        newCol < numCols &&
-        grid[newRow][newCol].isMine
-      ) {
-        mineCount++;
+      let mineCount = 0;
+      for (const [dx, dy] of directions) {
+        const newRow = row + dx;
+        const newCol = col + dy;
+        if (
+          newRow >= 0 &&
+          newRow < numRows &&
+          newCol >= 0 &&
+          newCol < numCols &&
+          grid[newRow][newCol].isMine
+        ) {
+          mineCount++;
+        }
       }
-    }
 
-    return mineCount;
-  };
+      return mineCount;
+    };
+  }, [grid, numRows, numCols]);
+
   const toggleFlag = (row: number, col: number) => {
     if (!grid[row][col].isOpen) {
       const cellKey = `${row}-${col}`;
@@ -141,7 +144,7 @@ export default function Beginner() {
     }
   };
 
-  const renderGrid = () => {
+  const renderGrid = useMemo(() => {
     return grid.map((row, rowIndex) => (
       <View key={rowIndex} style={styles.row}>
         {row.map((cell, colIndex) => (
@@ -171,7 +174,7 @@ export default function Beginner() {
         ))}
       </View>
     ));
-  };
+  }, [grid, gameSuccess, flaggedCells]);
 
   const handleCellPress = (row: number, col: number) => {
     const isMine = mines.some(([r, c]) => r === row && c === col);
@@ -258,7 +261,7 @@ export default function Beginner() {
           <Text>지뢰 개수 : {minesNum === "" ? "0" : minesNum}개</Text>
           <Text style={styles.elapsedTime}>경과 시간 : {elapsedTime}초</Text>
         </View>
-        {renderGrid()}
+        {renderGrid}
       </View>
     </DismissKeyboardView>
   );
